@@ -1,178 +1,187 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>calendar</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <!-- jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- bootstrap 4 -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <!-- fullcalendar -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.7.0/main.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/fullcalendar@5.7.0/main.min.js"></script>
+
+    <!-- ics.js for ICS file handling -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ics/0.2.0/ics.deps.min.js"></script>
+
     <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                timeZone: 'UTC',
-                initialView: 'dayGridMonth', // 월별 뷰로 설정
-                events: [],
-                headerToolbar: {
-                    center: 'addEventButton icsUploadButton icsDownloadButton syncICSButton'
-                },
-                customButtons: {
-                    addEventButton: {
-                        text: "일정 추가",
-                        click: function () {
-                            $("#calendarModal").modal("show");
-    
-                            $("#addCalendar").off("click").on("click", function () { // off()로 이전 이벤트 제거
-                                var content = $("#calendar_content").val();
-                                var start_date = $("#calendar_start_date").val();
-                                var start_time = $("#calendar_start_time").val();
-                                var end_date = $("#calendar_end_date").val();
-                                var end_time = $("#calendar_end_time").val();
-                                var location = $("#calendar_location").val();
-                                var description = $("#calendar_description").val();
-    
-                                if (!content) {
-                                    alert("내용을 입력하세요.");
-                                } else if (!start_date || !end_date || !start_time || !end_time) {
-                                    alert("날짜와 시간을 입력하세요.");
-                                } else if (new Date(end_date + ' ' + end_time) < new Date(start_date + ' ' + start_time)) {
-                                    alert("종료일이 시작일보다 먼저입니다.");
-                                } else {
-                                    var startDateTime = new Date(start_date + ' ' + start_time);
-                                    var endDateTime = new Date(end_date + ' ' + end_time);
-                                    var conflictingEvent = calendar.getEvents().find(event => {
-                                        return event.start < endDateTime && startDateTime < event.end; // 시간 중첩 확인
-                                    });
-    
-                                    if (conflictingEvent) {
-                                        alert("해당 시간에 이미 일정이 있습니다.");
-                                    } else {
-                                        calendar.addEvent({
-                                            title: content,
-                                            start: startDateTime.toISOString(),
-                                            end: endDateTime.toISOString(),
-                                            location: location,
-                                            description: description
-                                        });
-                                        $("#calendarModal").modal("hide");
-                                    }
+      document.addEventListener('DOMContentLoaded', function () {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        timeZone: 'UTC',
+        initialView: 'dayGridMonth',
+        events: [],
+        headerToolbar: {
+            center: 'addEventButton icsUploadButton icsDownloadButton'
+        },
+        customButtons: {
+            addEventButton: {
+                text: "일정 추가",
+                click: function () {
+                    $("#calendarModal").modal("show");
+
+                    $("#addCalendar").on("click", function () {
+                        var content = $("#calendar_content").val();
+                        var start_date = $("#calendar_start_date").val();
+                        var start_time = $("#calendar_start_time").val();
+                        var end_date = $("#calendar_end_date").val();
+                        var end_time = $("#calendar_end_time").val();
+                        var location = $("#calendar_location").val();
+                        var description = $("#calendar_description").val();
+
+                        if (content == null || content == "") {
+                            alert("내용을 입력하세요.");
+                        } else if (start_date == "" || end_date == "" || start_time == "" || end_time == "") {
+                            alert("날짜와 시간을 입력하세요.");
+                        } else if (new Date(end_date + ' ' + end_time) - new Date(start_date + ' ' + start_time) < 0) {
+                            alert("종료일이 시작일보다 먼저입니다.");
+                        } else {
+                            var startDateTime = new Date(start_date + ' ' + start_time);
+                            var endDateTime = new Date(end_date + ' ' + end_time);
+                            var eventData = {
+                                "title": content,
+                                "start": startDateTime.toISOString(),
+                                "end": endDateTime.toISOString(),
+                                "location": location,
+                                "description": description,
+                                "username": localStorage.getItem("username")  // 유저명 저장
+                            };
+
+                            // 캘린더에 일정 추가
+                            calendar.addEvent(eventData);
+
+                            // 백엔드로 일정 저장 요청
+                            $.ajax({
+                                url: 'http://localhost:5000/save_event',
+                                method: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify(eventData),
+                                success: function (response) {
+                                    alert('일정이 저장되었습니다.');
+                                    $("#calendarModal").modal("hide");
+                                },
+                                error: function (xhr, status, error) {
+                                    alert('일정 저장에 실패했습니다.');
                                 }
                             });
                         }
-                    },
-                    icsUploadButton: {
-                        text: "ICS 업로드",
-                        click: function () {
-                            $("#icsUploadInput").click();
-                        }
-                    },
-                    icsDownloadButton: {
-                        text: "ICS 다운로드",
-                        click: function () {
-                            var cal = ics();
-                            var events = calendar.getEvents();
-    
-                            events.forEach(event => {
-                                cal.addEvent(
-                                    event.title,
-                                    event.extendedProps.description || '',
-                                    event.start.toISOString(),
-                                    event.end.toISOString(),
-                                    event.extendedProps.location || ''
-                                );
-                            });
-    
-                            cal.download('calendar');
-                        }
-                    },
-                    syncICSButton: {
-                        text: "ICS 동기화",
-                        click: function () {
-                            const url = prompt("ICS URL을 입력하세요 (예: webcal://...)");
-                            if (url) {
-                                fetchAndParseICS(url);
-                            }
-                        }
-                    }
-                },
-                editable: true,
-                displayEventTime: true
-            });
-            calendar.render();
-    
-            // ICS 파일 업로드
-            $("#icsUploadInput").on("change", function (e) {
-                var file = e.target.files[0];
-                var reader = new FileReader();
-    
-                reader.onload = function (e) {
-                    var icsData = e.target.result;
-                    var parsedEvents = parseICS(icsData);
-    
-                    parsedEvents.forEach(function (event) {
-                        calendar.addEvent({
-                            title: event.summary,
-                            start: event.start.toISOString(),
-                            end: event.end.toISOString(),
-                            location: event.location,
-                            description: event.description
-                        });
                     });
-                };
-    
-                reader.readAsText(file);
-            });
-    
-            function parseICS(icsData) {
-                var jcal = ICAL.parse(icsData);
-                var comp = new ICAL.Component(jcal);
-                var vevents = comp.getAllSubcomponents('vevent');
-                var events = [];
-    
-                vevents.forEach(function (vevent) {
-                    var event = {
-                        summary: vevent.getFirstPropertyValue('summary'),
-                        start: vevent.getFirstPropertyValue('dtstart').toJSDate(),
-                        end: vevent.getFirstPropertyValue('dtend').toJSDate(),
-                        location: vevent.getFirstPropertyValue('location'),
-                        description: vevent.getFirstPropertyValue('description')
-                    };
-                    events.push(event);
-                });
-    
-                return events;
-            }
-    
-            async function fetchAndParseICS(url) {
-                try {
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error('네트워크 오류 발생');
-    
-                    // 기존 일정 삭제
-                    calendar.removeAllEvents();
-    
-                    const icsData = await response.text();
-                    const parsedEvents = parseICS(icsData);
-    
-                    parsedEvents.forEach(function (event) {
-                        calendar.addEvent({
-                            title: event.summary,
-                            start: event.start.toISOString(),
-                            end: event.end.toISOString(),
-                            location: event.location,
-                            description: event.description
-                        });
-                    });
-                } catch (error) {
-                    alert('ICS 파일 가져오기 오류: ' + error.message);
-                    console.error('ICS 파일 가져오기 오류:', error);
                 }
             }
+        },
+        editable: true,
+        displayEventTime: true
+    });
+    calendar.render();
+
+    // 페이지 로드 시 사용자명 입력받기
+    var username = prompt("사용자명을 입력하세요:", "user1");
+    localStorage.setItem("username", username);  // 유저명 로컬에 저장
+
+    // 해당 유저의 일정 불러오기
+    $.ajax({
+        url: `http://localhost:5000/get_events/${username}`,
+        method: 'GET',
+        success: function (data) {
+            if (data.ics) {
+                var parsedEvents = parseICS(data.ics);
+                parsedEvents.forEach(function (event) {
+                    calendar.addEvent({
+                        title: event.summary,
+                        start: event.start.toISOString(),
+                        end: event.end.toISOString(),
+                        location: event.location,
+                        description: event.description
+                    });
+                });
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('일정 불러오기에 실패했습니다.', error);
+        }
+    });
+
+    function parseICS(icsData) {
+        var jcal = ICAL.parse(icsData);
+        var comp = new ICAL.Component(jcal);
+        var vevents = comp.getAllSubcomponents('vevent');
+        var events = [];
+
+        vevents.forEach(function (vevent) {
+            var event = {
+                summary: vevent.getFirstPropertyValue('summary'),
+                start: vevent.getFirstPropertyValue('dtstart').toJSDate(),
+                end: vevent.getFirstPropertyValue('dtend').toJSDate(),
+                location: vevent.getFirstPropertyValue('location'),
+                description: vevent.getFirstPropertyValue('description')
+            };
+            events.push(event);
         });
+
+        return events;
+    }
+});
+
     </script>
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-    
+    <div id="calendarBox">
+        <div id="calendar"></div>
+    </div>
+
+    <!-- modal 추가 -->
+    <div class="modal fade" id="calendarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">일정을 입력하세요.</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="calendar_content" class="col-form-label">일정 내용</label>
+                        <input type="text" class="form-control" id="calendar_content" name="calendar_content">
+                        <label for="calendar_start_date" class="col-form-label">시작 날짜</label>
+                        <input type="date" class="form-control" id="calendar_start_date" name="calendar_start_date">
+                        <label for="calendar_start_time" class="col-form-label">시작 시간</label>
+                        <input type="time" class="form-control" id="calendar_start_time" name="calendar_start_time" step="1800"> <!-- 30분 단위 -->
+                        <label for="calendar_end_date" class="col-form-label">종료 날짜</label>
+                        <input type="date" class="form-control" id="calendar_end_date" name="calendar_end_date">
+                        <label for="calendar_end_time" class="col-form-label">종료 시간</label>
+                        <input type="time" class="form-control" id="calendar_end_time" name="calendar_end_time" step="1800"> <!-- 30분 단위 -->
+                        <label for="calendar_location" class="col-form-label">위치</label>
+                        <input type="text" class="form-control" id="calendar_location" name="calendar_location">
+                        <label for="calendar_description" class="col-form-label">설명</label>
+                        <textarea class="form-control" id="calendar_description" name="calendar_description"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" id="addCalendar">추가</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ICS 파일 업로드 input -->
+    <input type="file" id="icsUploadInput" style="display:none" accept=".ics">
 </body>
-</html>
-
-
-
