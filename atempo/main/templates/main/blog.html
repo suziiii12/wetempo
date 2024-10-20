@@ -6,6 +6,15 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>계시판1</h1>
+    <h1>게시판1</h1>
+    <table>
+        {% for schedule in schedules %}
+            <ul>
+                <li><a href="{{schedule.pk}}">{{schedule.friend_name}}</a></li>
+            </ul>
+        {% endfor %}
+    </table>    
+    <button><a href="new_post/">일정 추가</a></button>
+
 </body>
 </html>

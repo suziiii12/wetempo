@@ -1,0 +1,8 @@
+#calendarBox {
+    width: 300px;
+    height: 700px; /* 적절한 높이 지정 */
+}
+
+#calendar {
+    height: 700px;
+}

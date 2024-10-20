@@ -1,0 +1,5 @@
+#calendarBox {
+    width: 100%;
+    height: 600px; /* 적절한 높이 지정 */
+    margin: auto;
+}
