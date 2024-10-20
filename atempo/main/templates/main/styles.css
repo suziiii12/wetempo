@@ -1,0 +1,101 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #610505; 
+    color: #f2f2f2;
+}
+
+#calendar {
+    height: 550px;
+}
+
+#calendarBox {
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #610505    ; 
+    border-radius: 10px;
+    width: 393px;
+    
+}
+
+
+.fc-toolbar-title {
+    font-size: 2em;
+    font-weight: bold;
+    text-align: center;
+    color: #f9e3e3;
+    font-size: 1.5em;
+    margin: 10px 0;
+    
+}
+
+.fc-button {
+    background-color: #852828;
+    border: none;
+    color: #f2f2f2;
+    border-radius: 5px;
+    padding: 5px 8px;
+    margin: 0 5px;
+
+}
+
+.fc-button:hover {
+    background-color: #a64545;
+    color: white;
+}
+
+
+.fc-daygrid-day {
+    background-color: #4d0d0d; 
+    border: 1px solid #a64545; 
+}
+
+
+.fc-event {
+    background-color: #FF8585 
+    color: black;
+    border-radius: 10px;
+    padding: 2px 6px;
+    border: none;
+    font-size: 0.8em;
+
+}
+
+.fc-col-header-cell-cushion {
+    font-size: 1.2em;
+    color: #f9dcdc;
+}
+
+
+.fc-daygrid-day-number {
+    color: #E4DEE4;
+    font-size: 1.2em;
+    padding: 5px;
+}
+
+
+.modal-content {
+    background-color: #7a1c1c;
+    color: white;
+    border-radius: 8px;
+    padding: 15px;
+    max-width: 350px;
+    }
+}
+
+
+.form-control {
+    background-color: #522020;
+    color: #FF8585;
+    border-radius: 5px;
+    border: none;
+    padding: 8px;
+    font-size: 1em;
+
+}
+
+
+.fc-today-button {
+    display: none;
+}
