@@ -1,6 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
+<<<<<<< HEAD
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
@@ -9,6 +8,12 @@
     <link rel="stylesheet" href="{% static 'styles.css' %}">
     <script src="{% static 'calendar.js' %}"></script>
     <script src="{% static 'main.js' %}"></script>
+=======
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>calendar</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+>>>>>>> a7c7b11f3fea1461dc26ec54d990bb45af9c7e8c
 
     <!-- jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -18,17 +23,146 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
+<<<<<<< HEAD
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
 
+=======
+>>>>>>> a7c7b11f3fea1461dc26ec54d990bb45af9c7e8c
     <!-- fullcalendar -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.7.0/main.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/fullcalendar@5.7.0/main.min.js"></script>
 
     <!-- ics.js for ICS file handling -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ics/0.2.0/ics.deps.min.js"></script>
+<<<<<<< HEAD
     
+=======
+
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function () {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        timeZone: 'UTC',
+        initialView: 'dayGridMonth',
+        events: [],
+        headerToolbar: {
+            center: 'addEventButton icsUploadButton icsDownloadButton'
+        },
+        customButtons: {
+            addEventButton: {
+                text: "일정 추가",
+                click: function () {
+                    $("#calendarModal").modal("show");
+
+                    $("#addCalendar").on("click", function () {
+                        var content = $("#calendar_content").val();
+                        var start_date = $("#calendar_start_date").val();
+                        var start_time = $("#calendar_start_time").val();
+                        var end_date = $("#calendar_end_date").val();
+                        var end_time = $("#calendar_end_time").val();
+                        var location = $("#calendar_location").val();
+                        var description = $("#calendar_description").val();
+
+                        if (content == null || content == "") {
+                            alert("내용을 입력하세요.");
+                        } else if (start_date == "" || end_date == "" || start_time == "" || end_time == "") {
+                            alert("날짜와 시간을 입력하세요.");
+                        } else if (new Date(end_date + ' ' + end_time) - new Date(start_date + ' ' + start_time) < 0) {
+                            alert("종료일이 시작일보다 먼저입니다.");
+                        } else {
+                            var startDateTime = new Date(start_date + ' ' + start_time);
+                            var endDateTime = new Date(end_date + ' ' + end_time);
+                            var eventData = {
+                                "title": content,
+                                "start": startDateTime.toISOString(),
+                                "end": endDateTime.toISOString(),
+                                "location": location,
+                                "description": description,
+                                "username": localStorage.getItem("username")  // 유저명 저장
+                            };
+
+                            // 캘린더에 일정 추가
+                            calendar.addEvent(eventData);
+
+                            // 백엔드로 일정 저장 요청
+                            $.ajax({
+                                url: 'http://localhost:5000/save_event',
+                                method: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify(eventData),
+                                success: function (response) {
+                                    alert('일정이 저장되었습니다.');
+                                    $("#calendarModal").modal("hide");
+                                },
+                                error: function (xhr, status, error) {
+                                    alert('일정 저장에 실패했습니다.');
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        },
+        editable: true,
+        displayEventTime: true
+    });
+    calendar.render();
+
+    // 페이지 로드 시 사용자명 입력받기
+    var username = prompt("사용자명을 입력하세요:", "user1");
+    localStorage.setItem("username", username);  // 유저명 로컬에 저장
+
+    // 해당 유저의 일정 불러오기
+    $.ajax({
+        url: `http://localhost:5000/get_events/${username}`,
+        method: 'GET',
+        success: function (data) {
+            if (data.ics) {
+                var parsedEvents = parseICS(data.ics);
+                parsedEvents.forEach(function (event) {
+                    calendar.addEvent({
+                        title: event.summary,
+                        start: event.start.toISOString(),
+                        end: event.end.toISOString(),
+                        location: event.location,
+                        description: event.description
+                    });
+                });
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('일정 불러오기에 실패했습니다.', error);
+        }
+    });
+
+    function parseICS(icsData) {
+        var jcal = ICAL.parse(icsData);
+        var comp = new ICAL.Component(jcal);
+        var vevents = comp.getAllSubcomponents('vevent');
+        var events = [];
+
+        vevents.forEach(function (vevent) {
+            var event = {
+                summary: vevent.getFirstPropertyValue('summary'),
+                start: vevent.getFirstPropertyValue('dtstart').toJSDate(),
+                end: vevent.getFirstPropertyValue('dtend').toJSDate(),
+                location: vevent.getFirstPropertyValue('location'),
+                description: vevent.getFirstPropertyValue('description')
+            };
+            events.push(event);
+        });
+
+        return events;
+    }
+});
+
+    </script>
+    <link rel="stylesheet" href="styles.css">
+>>>>>>> a7c7b11f3fea1461dc26ec54d990bb45af9c7e8c
 </head>
+
 <body>
+<<<<<<< HEAD
     <body>
         <div id="calendarBox">
             <div id="calendar"></div>
@@ -84,3 +218,48 @@
     </body>
 </body>
 </html>
+=======
+    <div id="calendarBox">
+        <div id="calendar"></div>
+    </div>
+
+    <!-- modal 추가 -->
+    <div class="modal fade" id="calendarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">일정을 입력하세요.</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="calendar_content" class="col-form-label">일정 내용</label>
+                        <input type="text" class="form-control" id="calendar_content" name="calendar_content">
+                        <label for="calendar_start_date" class="col-form-label">시작 날짜</label>
+                        <input type="date" class="form-control" id="calendar_start_date" name="calendar_start_date">
+                        <label for="calendar_start_time" class="col-form-label">시작 시간</label>
+                        <input type="time" class="form-control" id="calendar_start_time" name="calendar_start_time" step="1800"> <!-- 30분 단위 -->
+                        <label for="calendar_end_date" class="col-form-label">종료 날짜</label>
+                        <input type="date" class="form-control" id="calendar_end_date" name="calendar_end_date">
+                        <label for="calendar_end_time" class="col-form-label">종료 시간</label>
+                        <input type="time" class="form-control" id="calendar_end_time" name="calendar_end_time" step="1800"> <!-- 30분 단위 -->
+                        <label for="calendar_location" class="col-form-label">위치</label>
+                        <input type="text" class="form-control" id="calendar_location" name="calendar_location">
+                        <label for="calendar_description" class="col-form-label">설명</label>
+                        <textarea class="form-control" id="calendar_description" name="calendar_description"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" id="addCalendar">추가</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ICS 파일 업로드 input -->
+    <input type="file" id="icsUploadInput" style="display:none" accept=".ics">
+</body>
+>>>>>>> a7c7b11f3fea1461dc26ec54d990bb45af9c7e8c
